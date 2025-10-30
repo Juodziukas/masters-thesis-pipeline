@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+channel_priority: strict
+dependencies:
+  - minimap2
+  - samtools
+  - metabat2
+  - pigz
+  - gzip
