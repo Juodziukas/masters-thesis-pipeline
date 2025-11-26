@@ -1,30 +1,40 @@
-import csv
 import subprocess
 from pathlib import Path
 
-contigs  = Path(str(snakemake.input.contigs))     # type: ignore
-depth    = Path(str(snakemake.input.depth))       # type: ignore
-bins_dir = Path(str(snakemake.output.bins_dir))   # type: ignore
-manifest = Path(str(snakemake.output.manifest))   # type: ignore
-prefix   = str(snakemake.params.prefix)           # type: ignore
-threads  = int(snakemake.threads)                 # type: ignore
+fasta = Path(str(snakemake.input.fasta))          # type: ignore
+depth = Path(str(snakemake.input.depth))          # type: ignore
+outdir = Path(str(snakemake.params.outdir))       # type: ignore
+test_mode = bool(snakemake.params.test_mode)      # type: ignore
+wildcards = snakemake.wildcards                   # type: ignore
+threads = int(snakemake.threads)                  # type: ignore
 
-bins_dir.mkdir(parents=True, exist_ok=True)
+outdir.mkdir(parents=True, exist_ok=True)
 
-# Run metabat2
-mb_cmd = [
-    "metabat2",
-    "-i", str(contigs),
-    "-a", str(depth),
-    "-o", prefix,
-    "-t", str(threads)
-]
-subprocess.run(mb_cmd, check=True)
-
-# Collect produced bins (bin.*.fa) and write manifest
-bin_files = sorted(bins_dir.glob("bin.*.fa"))
-with manifest.open("w", newline="") as fh:
-    w = csv.writer(fh, delimiter="\t")
-    w.writerow(["bin_id", "path"])
-    for bf in bin_files:
-        w.writerow([bf.stem, str(bf.resolve())])
+if test_mode:
+    # make 1 fake bin and a tiny manifest
+    with open(outdir / "bin.1.fa", "w") as fh:
+        fh.write(f">bin1_{wildcards.sample}\nATGCATGCATGC\n")
+    with open(outdir / "manifest.tsv", "w") as mf:
+        mf.write("bin\tcontigs\n")
+        mf.write(f"bin.1.fa\tcontig1_{wildcards.sample}\n")
+else:
+    # real metabat2
+    subprocess.run([
+        "metabat2",
+        "-i", str(fasta),
+        "-a", str(depth),
+        "-o", str(outdir / "bin"),
+        "-t", str(threads)
+    ], check=True)
+    
+    # Create manifest
+    bins = sorted(outdir.glob("bin.*.fa"))
+    with open(outdir / "manifest.tsv", "w") as mf:
+        mf.write("bin\tcontigs\n")
+        for bin_file in bins:
+            # Read contigs from bin file
+            with open(bin_file) as f:
+                for line in f:
+                    if line.startswith(">"):
+                        contig = line[1:].strip().split()[0]
+                        mf.write(f"{bin_file.name}\t{contig}\n")

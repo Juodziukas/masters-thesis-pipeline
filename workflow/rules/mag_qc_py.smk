@@ -3,13 +3,12 @@ rule checkm2_predict_py:
         f"{OUTDIR}/binning/{{sample}}/metabat2/manifest.tsv"
     output:
         f"{OUTDIR}/mag_qc/{{sample}}/checkm2.tsv"
-    conda: "../envs/checkm2.yaml"
     threads: 4
     params:
         db = config["dbs"]["checkm2"],
         test_mode = config.get("test_mode", False)
     run:
-        import shutil, subprocess
+        import os, shutil, subprocess
         from pathlib import Path
 
         outdir = Path(f"{OUTDIR}/mag_qc/{wildcards.sample}")
@@ -27,13 +26,17 @@ rule checkm2_predict_py:
             tmp.mkdir(parents=True, exist_ok=True)
 
             cmd = [
-                "checkm2", "predict",
-                "--threads", str(snakemake.threads),
+                "/mnt/workspace/miniconda3/envs/checkmv2/bin/checkm2", "predict",
+                "--threads", str(threads),
                 "--input", f"{OUTDIR}/binning/{wildcards.sample}/metabat2",
                 "--output-directory", str(tmp),
-                "--database_path", params.db,   # << this is the key change
+                "--database_path", params.db,
+                "-x", "fa",   
             ]
-            subprocess.run(cmd, check=True)
+            env = os.environ.copy()
+            env["PATH"] = "/mnt/workspace/miniconda3/envs/checkmv2/bin:" + env["PATH"]
+
+            subprocess.run(cmd, check=True, env=env)
 
             # checkm2 usually writes something like a TSV in tmp, so copy it:
             tsvs = list(tmp.glob("*.tsv"))

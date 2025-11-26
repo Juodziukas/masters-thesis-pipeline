@@ -7,15 +7,15 @@ project: "masters"
 threads: 8
 
 use_containers: false
-conda_frontend: "mamba"
+conda_frontend: "conda"
 
 # Samples table 
 samples_tsv: "config/samples.tsv"
 
 # Reference databases
 dbs:
-  checkm2: "/home/juodziukas/db/checkm2/CheckM2_database/uniref100.KO.1.dmnd"
-  gtdbtk:  "/home/juodziukas/db/gtdbtk/release220"
+  checkm2: "/home/ignas.juodziunas/databases/CheckM2_database/uniref100.KO.1.dmnd"
+  gtdbtk:  "/mnt/workspace/databases/gtdb/release226"
 
 # Tools/choices
 assembler: "metaflye"         # metaflye, raven, shasta
@@ -46,5 +46,5 @@ flye:
   asm_coverage: 30
   genome_size: 5m
 
-test_mode: true
+test_mode: false
   

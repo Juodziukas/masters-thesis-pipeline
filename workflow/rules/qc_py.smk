@@ -13,13 +13,20 @@ rule nanoplot_py:
 
 rule multiqc_py:
     input:
-        nanoplots = expand(f"{OUTDIR}/qc/{{sample}}/nanoplot", sample=SAMPLES)
+        nanoplots = expand(f"{OUTDIR}/qc/{{sample}}/nanoplot",                      sample=SAMPLES),
+        trimmed   = expand(f"{OUTDIR}/trim/{{sample}}.fastq.gz",                    sample=SAMPLES),
+        assemblies= expand(f"{OUTDIR}/assembly/{{sample}}/contigs.fasta",           sample=SAMPLES),
+        medaka    = expand(f"{OUTDIR}/polish/{{sample}}/medaka/consensus.fasta",    sample=SAMPLES),
+        manifests = expand(f"{OUTDIR}/binning/{{sample}}/metabat2/manifest.tsv",    sample=SAMPLES),
+        checkm2   = expand(f"{OUTDIR}/mag_qc/{{sample}}/checkm2.tsv",               sample=SAMPLES),
+        gtdb      = expand(f"{OUTDIR}/taxonomy/{{sample}}/gtdbtk.tsv",              sample=SAMPLES),
+        summary   = f"{OUTDIR}/summary/metrics/summary.csv"
     output:
         html = f"{OUTDIR}/summary/multiqc/multiqc_report.html"
     threads: 2
     conda: "../envs/qc.yaml"
     params:
-        outdir = f"{OUTDIR}/summary/multiqc",
+        outdir    = f"{OUTDIR}/summary/multiqc",
         scan_root = OUTDIR
     script:
         "../scripts/run_multiqc.py"

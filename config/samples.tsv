@@ -1,4 +1,2 @@
-sample_id	fastq
-testA	/home/juodziukas/data/testA_small.fastq.gz
-testB	/home/juodziukas/data/testB_small.fastq.gz
-
+sample	fastq
+np_test 	data/raw/SRR17913199.fastq.gz

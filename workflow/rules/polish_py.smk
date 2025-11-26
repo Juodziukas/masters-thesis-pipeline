@@ -3,7 +3,7 @@ rule medaka_polish_py:
         draft = f"{OUTDIR}/assembly/{{sample}}/contigs.fasta",
         reads = f"{OUTDIR}/trim/{{sample}}.fastq.gz"
     output:
-        polished = f"{OUTDIR}/polish/{{sample}}/medaka.fasta"
+        polished = f"{OUTDIR}/polish/{{sample}}/medaka/consensus.fasta"
     benchmark:
         f"benchmarks/polish_medaka_{{sample}}.tsv"
     threads: THREADS

@@ -61,7 +61,7 @@ targets += expand(f"{OUTDIR}/assembly/{{sample}}/contigs.fasta", sample=SAMPLES)
 
 # Polishing: Medaka is the main path if enabled
 if bool(config.get("polish", {}).get("use_medaka", True)):
-    targets += expand(f"{OUTDIR}/polish/{{sample}}/medaka.fasta", sample=SAMPLES)
+    targets += expand(f"{OUTDIR}/polish/{{sample}}/medaka/consensus.fasta", sample=SAMPLES)
 
 # QC summary is useful at every stage
 targets += [f"{OUTDIR}/summary/multiqc/multiqc_report.html"]

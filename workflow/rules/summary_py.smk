@@ -1,6 +1,6 @@
 rule summary_aggregate_py:
     input:
-        contigs   = expand(f"{OUTDIR}/polish/{{sample}}/medaka.fasta",        sample=SAMPLES),
+        contigs   = expand(f"{OUTDIR}/polish/{{sample}}/medaka/consensus.fasta",        sample=SAMPLES),
         manifests = expand(f"{OUTDIR}/binning/{{sample}}/metabat2/manifest.tsv", sample=SAMPLES),
         checkm2   = expand(f"{OUTDIR}/mag_qc/{{sample}}/checkm2.tsv",         sample=SAMPLES),
         gtdb      = expand(f"{OUTDIR}/taxonomy/{{sample}}/gtdbtk.tsv",        sample=SAMPLES)
