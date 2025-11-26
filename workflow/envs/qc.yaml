@@ -1,0 +1,13 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - nanoplot
+  - fastqc
+  - multiqc
+  - pigz
+  - gzip
+  - coreutils
+  - python-kaleido

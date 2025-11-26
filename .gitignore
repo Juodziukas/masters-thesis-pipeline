@@ -1,0 +1,30 @@
+# Snakemake & results
+.snakemake/
+results/
+logs/
+*.html
+*.zip
+*.gz
+*.fastq
+*.fq
+*.bam
+*.bai
+*.sam
+*.fa
+*.fasta
+
+# Conda envs
+.envs/
+.env/
+*.yaml.lock
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Mac/OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

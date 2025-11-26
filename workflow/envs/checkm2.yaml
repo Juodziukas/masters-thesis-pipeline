@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+channel_priority: strict
+dependencies:
+  - python=3.8
+  - checkm2=1.1.0
+  - hmmer
+  - prodigal
+  - mmseqs2

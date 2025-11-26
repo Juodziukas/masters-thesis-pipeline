@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+channel_priority: strict
+dependencies:
+  - flye
+  - gzip
+  - pigz

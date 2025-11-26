@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+channel_priority: strict
+dependencies:
+  - python=3.10
+  - das_tool
+  - diamond
+  - pigz
+  - gzip

@@ -1,0 +1,79 @@
+
+configfile: "config/config.yaml"
+
+import csv, os, io
+from pathlib import Path
+
+def read_samples(tsv_path):
+    if not os.path.exists(tsv_path):
+        raise FileNotFoundError(f"Missing samples file: {tsv_path}")
+    samples, mapping = [], {}
+    with open(tsv_path, "r", newline="") as fh:
+        # read first line; handle BOM/CRLF; detect delimiter
+        first = fh.readline().lstrip("\ufeff").rstrip("\r\n")
+        if not first:
+            raise ValueError(f"{tsv_path} is empty")
+        delim = "\t" if "\t" in first else ("," if "," in first else None)
+        if delim is None:
+            # fallback: collapse whitespace
+            first = "\t".join(first.split())
+            rest = fh.read()
+            rest = "\n".join("\t".join(line.split()) for line in rest.splitlines())
+            import io as _io
+            fh = _io.StringIO(first + "\n" + rest)
+            delim = "\t"
+        else:
+            fh.seek(0)
+        rdr = csv.reader(fh, delimiter=delim)
+        header = [h.strip().lower() for h in next(rdr)]
+        # allow 'sample' or 'sample_id'
+        i_sample = header.index("sample_id") if "sample_id" in header else header.index("sample")
+        i_fastq  = header.index("fastq")
+        for row in rdr:
+            if not row or all(not x.strip() for x in row): continue
+            sid = row[i_sample].strip(); fq = row[i_fastq].strip()
+            if sid and fq:
+                samples.append(sid); mapping[sid] = fq
+    if not samples:
+        raise ValueError(f"No samples parsed from {tsv_path}. Expect headers 'sample_id' (or 'sample') and 'fastq'.")
+    return samples, mapping
+
+SAMPLES, SAMPLE_FASTQ = read_samples(config["samples_tsv"])
+THREADS = int(config.get("threads", 8))
+OUTDIR  = config.get("outdir", "results")
+
+# ---------- Include rule files (each rule uses script: *.py, not shell:) ----------
+include: "rules/qc_py.smk"        # NanoPlot + MultiQC via Python script wrappers
+include: "rules/trim_py.smk"      # Porechop/Filtlong via Python script wrappers
+include: "rules/assembly_py.smk"  # metaFlye via Python script wrapper
+include: "rules/polish_py.smk"    # Racon+Medaka polishing workflow
+include: "rules/binning_py.smk"
+include: "rules/mag_qc_py.smk"
+include: "rules/taxonomy_py.smk"
+include: "rules/summary_py.smk"
+
+
+# ---------- Final targets for current pipeline stage ----------
+targets = []
+# Always produce trimmed reads and assemblies
+targets += expand(f"{OUTDIR}/trim/{{sample}}.fastq.gz", sample=SAMPLES)
+targets += expand(f"{OUTDIR}/assembly/{{sample}}/contigs.fasta", sample=SAMPLES)
+
+# Polishing: Medaka is the main path if enabled
+if bool(config.get("polish", {}).get("use_medaka", True)):
+    targets += expand(f"{OUTDIR}/polish/{{sample}}/medaka/consensus.fasta", sample=SAMPLES)
+
+# QC summary is useful at every stage
+targets += [f"{OUTDIR}/summary/multiqc/multiqc_report.html"]
+
+# after refinement and dereplication the final manifest resides under polished_bins
+targets += expand(f"{OUTDIR}/binning/{{sample}}/polished_bins/manifest.tsv", sample=SAMPLES)
+
+targets += expand(f"{OUTDIR}/mag_qc/{{sample}}/checkm2.tsv", sample=SAMPLES)
+
+targets += expand(f"{OUTDIR}/taxonomy/{{sample}}/gtdbtk.tsv", sample=SAMPLES)
+
+targets += [f"{OUTDIR}/summary/metrics/summary.csv"]
+
+rule all:
+    input: targets

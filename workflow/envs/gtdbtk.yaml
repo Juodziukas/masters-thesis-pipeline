@@ -1,0 +1,14 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - gtdbtk=2.4.0
+  - tqdm>=4.66
+  - hmmer>=3.3
+  - pplacer
+  - prodigal
+  - numpy>=1.23,<2
+  - pandas
+  - biopython

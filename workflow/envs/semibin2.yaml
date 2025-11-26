@@ -1,0 +1,10 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+channel_priority: strict
+dependencies:
+  - python=3.10
+  - semibin
+  - pigz
+  - gzip
